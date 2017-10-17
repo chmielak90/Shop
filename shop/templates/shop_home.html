@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block category%}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div id="MainMenu">
+                <div class="list-group panel">
+                    {% for hedding in heddings %}
+                    <a href="#demo{{ hedding.id }}" class="list-group-item list-group-item-success grey_menu" data-toggle="collapse" data-parent="#MainMenu">{{ hedding.category_name }}</a>
+                    <div class="collapse" id="demo{{ hedding.id }}">
+                        {% for category in categories %}
+                        {% if category.parent_category == hedding %}
+                        <a href="#SubMenu{{ category.id }}" class="list-group-item grey_submenu" data-toggle="collapse" data-parent="#SubMenu{{ category.id }}">{{category.category_name}}<i class="fa fa-caret-down"></i></a>
+                        <div class="collapse list-group-submenu" id="SubMenu{{ category.id }}">
+                            {% for child in categories %}
+                            {% if child.parent_category == category %}
+                            <a href="{% url 'product_view' id=category.id %}" class="list-group-item grey_item_menu" data-parent="#SubMenu{{ category.id }}">{{ child.category_name}}</a>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif%}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block search %}
+<div class="container">
+    <form action="/">
+        <div class="input-group col-xs-10 col-sm-6 col-sm-offset-3">
+            <input type="text" class="form-control" placeholder="Search" name="search" style="margin-top: 17px">
+            <div class="input-group-btn">
+                <button class="btn btn-default" type="submit" style="margin-top: 17px"><i class="glyphicon glyphicon-search"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
