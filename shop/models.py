@@ -24,7 +24,9 @@ class Address(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(User)
     comments = models.TextField(null=True)
+    sum_product_cost = models.FloatField(null=False)
     send_address = models.OneToOneField(Address)
+    order_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return "user: {}, order num: {}".format(self.user, self.id)
@@ -33,6 +35,7 @@ class Order(models.Model):
 class Invoice(models.Model):            # faktura
     order = models.OneToOneField(Order)
     bill_address = models.OneToOneField(Address)
+    inserted_date = models.DateField(auto_now_add=True)
 
 
 class ShoppingCart(models.Model):
@@ -53,8 +56,10 @@ class ProductCategory(models.Model):
 class Product(models.Model):
     product_name = models.CharField(max_length=64)
     description = models.TextField()
+    price = models.FloatField(null=False)
     category = models.ManyToManyField(ProductCategory)
     image = models.ImageField(max_length=64, blank=True, null=True)
+    add_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.product_name
@@ -63,6 +68,7 @@ class Product(models.Model):
 class OrderLine(models.Model):
     product = models.OneToOneField(Product)
     quantity = models.IntegerField(null=False)
+    price_quantity = models.FloatField(null=False)
     order = models.ForeignKey(Order, null=True, blank=True)
     shopping_cart = models.ForeignKey(ShoppingCart)
 

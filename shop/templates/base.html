@@ -1,4 +1,6 @@
 {% load staticfiles %}
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -30,6 +32,7 @@
                     <li><a href="{% url 'contact_us' %}">Contact</a></li>
                     {% if request.user.is_authenticated and request.user.is_staff %}
                     <li><a href="{% url 'add_product' %}">Add Product</a></li>
+                    <li><a href="{% url 'change_product' %}">Change Product</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

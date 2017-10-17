@@ -105,4 +105,19 @@ a.grey_submenu:focus{
 }
 */
 
+.img-thumbnail {
+    width: 20vh;
+}
 
+.quantity_product{
+    width: 7vh;
+}
+
+.inline{
+    display: inline;
+}
+
+.inline_border{
+    display: inline;
+    margin-left: 5px;
+}

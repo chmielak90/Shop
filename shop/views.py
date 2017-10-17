@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.core import serializers
+from django.http import Http404
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 
@@ -13,15 +14,15 @@ from django.views import View
 from django.views.generic import CreateView
 from django.views.generic import UpdateView
 
-from .models import User, ProductCategory, Address, Product
-from .forms import LoginForm, RegisterForm, ChangePasswordForm
+from .models import User, ProductCategory, Address, Product, ShoppingCart, OrderLine, ProductAvailability
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityForm, ProductAvailabilityForm
 
 
 class ShopView(View):
 
     def get(self, request):
 
-        return render(request, 'shop_home.html')
+        return render(request, 'shop_home.html', )
 
 
 class RegisterView(View):
@@ -37,6 +38,7 @@ class RegisterView(View):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             new_user = User.objects.create_user(username=username, email=email, password=password)
+            ShoppingCart.objects.create(user=new_user)
             g = Group.objects.get(name='Buyer')
             g.user_set.add(new_user)
             user = authenticate(username=username, password=password)
@@ -149,29 +151,66 @@ class ChangePasswordView(LoginRequiredMixin, View):
         return render(request, 'change_password.html', {'form': form})
 
 
-class AddProductView(LoginRequiredMixin, CreateView):
-    model = Product
-    template_name = 'add_product.html'
-    fields = '__all__'
+class AddProductView(LoginRequiredMixin, View):
 
-    def get_success_url(self):
-        return reverse_lazy('product_view', kwargs={'id': self.object.id})
+    def get(self, request):
+        form = ProductAvailabilityForm
+        return render(request, 'add_product.html', {'form': form})
+
+    def post(self, request):
+        form = ProductAvailabilityForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save()
+            p = Product.objects.get(pk=product.pk)
+            ProductAvailability.objects.create(quantity=form.cleaned_data['quantity'], product=p)
+            url = reverse_lazy('product_view', kwargs={'id': product.pk})
+            return HttpResponseRedirect(url)
 
 
-class ProductView(CreateView):
+class ProductView(View):
+
+    def get(self, request, id):
+        product = Product.objects.get(pk=id)
+        product_avability = ProductAvailability.objects.get(product=product)
+        quantity = product_avability.quantity
+        form = ProductQuantityForm
+        return render(request, 'product_view.html', {'product': product, 'form': form, 'quantity': quantity})
+
+    def post(self, request, id):
+        form = ProductQuantityForm(request.POST)
+        if form.is_valid():
+            product = Product.objects.get(pk=id)
+            shopping_cart = ShoppingCart.objects.get(user=request.user)
+            OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
+                                     price_quantity=form.cleaned_data['quantity']*product.price,
+                                     shopping_cart=shopping_cart)
+            url = reverse('shopping_cart')
+            return HttpResponseRedirect(url)
+        else:
+            return Http404('Bad gatway')
+
+
+class ChangeProductView(UpdateView):
     pass
+
 
 class PromoView(CreateView):
     pass
 
-class NewProductView(CreateView):
-    pass
+
+class NewProductView(View):
+
+    def get(self, request):
+        products = Product.objects.all().order_by('add_date')[:6]
+        return render(request, 'news_products.html', {'products': products})
+
 
 class ContactView(CreateView):
     pass
 
 
-
+class ShoppingCartView(CreateView):
+    pass
 
 
 

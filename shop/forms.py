@@ -1,6 +1,8 @@
 from django import forms
 from django.core.validators import EmailValidator
 
+from shop.models import Product, ProductAvailability
+
 
 class LoginForm(forms.Form):
     CNT_ID = {
@@ -71,3 +73,33 @@ class ChangePasswordForm(forms.Form):
             raise forms.ValidationError(
                 "Password's don't match!"
             )
+
+
+class ProductQuantityForm(forms.Form):
+
+    CNT_QUANTITY = {
+        'name': "quantity",
+        'min': "1",
+        'step': "1",
+        'value':  "1",
+        'class': "form-control input-sm col-sm-4 quantity_product",
+    }
+
+    quantity = forms.IntegerField(label="", widget=forms.NumberInput(attrs=CNT_QUANTITY))
+
+
+class ProductAvailabilityForm(forms.ModelForm):
+    CNT_QUANTITY = {
+        'name': "quantity",
+        'min': "0",
+        'step': "1",
+        'value': "0",
+        'class': "form-control col-sm-4",
+    }
+
+    quantity = forms.IntegerField(label="Quantity avaliable", widget=forms.NumberInput(attrs=CNT_QUANTITY))
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+

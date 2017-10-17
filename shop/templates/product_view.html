@@ -1,0 +1,42 @@
+{% extends "shop_home.html" %}
+{% load widget_tweaks %}
+
+
+{% block content%}
+<div class="container">
+    <p><h3>{{ product.product_name}}</h3></p>
+<p><img class="img-responsive img-thumbnail" src={{ product.image.url }} </p>
+<p>{{ product.description}}</p>
+<br>
+<br>
+<p>Price: <b>{{product.price}}</b> usd
+<div class="inline">
+    <form action="" method="POST">
+        {% csrf_token %}
+        <div class="inline_border">
+            {% for field in form %}
+            {% if quantity > 0 %}
+            {% with quantity|stringformat:"s" as num %}
+            {% with "max:"|add:num as value%}
+            {{ field|attr:value }}
+            {% endwith %}
+            {% endwith %}
+            {% else %}
+            {{ field|attr:"value:0"|attr:"disabled" }}
+            {% endif %}
+            {% endfor%}
+        </div>
+        {% if quantity > 0 %}
+        <div class="inline_border"><button type="submit" class="btn btn-default btn-sm">
+            <span class="glyphicon glyphicon-shopping-cart"></span> Add to cart
+            </button></div>
+            {% else %}
+            <div class="inline_border"><button type="submit" class="btn btn-default btn-sm" disabled>
+            <span class="glyphicon glyphicon-shopping-cart"></span> Add to cart
+            </button></div>
+            {% endif %}
+    </form>
+</div>
+</p>
+</div>
+{% endblock %}

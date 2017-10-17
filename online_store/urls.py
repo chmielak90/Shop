@@ -19,8 +19,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from shop.views import (ShopView, LogIn, LogOutView, RegisterView, EditUserSignView,
-                        AddAddressView, EditAddressView, ShowAddressesView, UserInfoView, AddProductView, CreateView,
-                        ProductView, UserEditView, PromoView, NewProductView, ContactView, ChangePasswordView)
+                        AddAddressView, EditAddressView, ShowAddressesView, UserInfoView, AddProductView,
+                        ProductView, UserEditView, PromoView, NewProductView, ContactView, ChangePasswordView,
+                        ShoppingCartView, ChangeProductView)
 
 
 urlpatterns = [
@@ -35,11 +36,13 @@ urlpatterns = [
     url(r'^edit_address/(?P<pk>(\d)+)$', EditAddressView.as_view(), name='edit_address'),
     url(r'^user$', UserInfoView.as_view(), name='user_info'),
     url(r'^add_product$', AddProductView.as_view(), name='add_product'),
+    url(r'^change_product', ChangeProductView.as_view(), name='change_product'),
     url(r'^product/(?P<id>(\d)+)$', ProductView.as_view(), name='product_view'),
     url(r'^edit_user$', UserEditView.as_view()),
     url(r'^promo$', PromoView.as_view(), name='promo'),
     url(r'^news$', NewProductView.as_view(), name='new_products'),
     url(r'^contact_us$', ContactView.as_view(), name='contact_us'),
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
+    url(r'^cart$', ShoppingCartView.as_view(),name='shopping_cart'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
