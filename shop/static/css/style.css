@@ -121,3 +121,9 @@ a.grey_submenu:focus{
     display: inline;
     margin-left: 5px;
 }
+
+.image_categories{
+    height: 70px;
+    margin-top: 5px;
+    
+}

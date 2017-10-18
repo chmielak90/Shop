@@ -17,7 +17,7 @@
                         <div class="collapse list-group-submenu" id="SubMenu{{ category.id }}">
                             {% for child in categories %}
                             {% if child.parent_category == category %}
-                            <a href="{% url 'product_view' id=category.id %}" class="list-group-item grey_item_menu" data-parent="#SubMenu{{ category.id }}">{{ child.category_name}}</a>
+                            <a href="{% url 'category_products' id=child.id %}" class="list-group-item grey_item_menu" data-parent="#SubMenu{{ category.id }}">{{ child.category_name}}</a>
                             {% endif %}
                             {% endfor %}
                         </div>

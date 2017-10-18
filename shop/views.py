@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, logout, login
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.core import serializers
 from django.http import Http404
@@ -151,7 +151,8 @@ class ChangePasswordView(LoginRequiredMixin, View):
         return render(request, 'change_password.html', {'form': form})
 
 
-class AddProductView(LoginRequiredMixin, View):
+class AddProductView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = 'add_product'
 
     def get(self, request):
         form = ProductAvailabilityForm
@@ -161,8 +162,7 @@ class AddProductView(LoginRequiredMixin, View):
         form = ProductAvailabilityForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save()
-            p = Product.objects.get(pk=product.pk)
-            ProductAvailability.objects.create(quantity=form.cleaned_data['quantity'], product=p)
+            ProductAvailability.objects.create(quantity=form.cleaned_data['quantity'], product=product)
             url = reverse_lazy('product_view', kwargs={'id': product.pk})
             return HttpResponseRedirect(url)
 
@@ -187,18 +187,52 @@ class ProductView(View):
             url = reverse('shopping_cart')
             return HttpResponseRedirect(url)
         else:
-            return Http404('Bad gatway')
+            return Http404('Bad gateway')
 
 
-class ChangeProductView(UpdateView):
-    pass
+class ChangeProductView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = 'change_product'
+    form_class = ProductAvailabilityForm
+    template_name = 'add_product.html'
+
+    def get_object(self, queryset=None):
+        return Product.objects.get(pk=self.kwargs.get('pk'))
+
+    def post(self, request, pk):
+        form = ProductAvailabilityForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = Product.objects.get(pk=pk)
+            product.product_name = form.cleaned_data['product_name']
+            product.description = form.cleaned_data['description']
+            product.price = form.cleaned_data['price']
+            if form.cleaned_data['image']:
+                product.image = None
+                product.save()
+                product.image = request.FILES['image']
+            product.category = form.cleaned_data['category']
+            product.save()
+            available = ProductAvailability.objects.get(product=product)
+            available.quantity = form.cleaned_data['quantity']
+            available.save()
+        url = reverse_lazy('product_view', kwargs={'id': product.id})
+        return HttpResponseRedirect(url)
+
+
+class ShowCategoryProductView(View):
+
+    def get(self, request, id):
+        category = ProductCategory.objects.get(pk=id)
+        print(category)
+        products = Product.objects.filter(category=category)
+        print(products)
+        return render(request, 'category.html', {'products': products})
 
 
 class PromoView(CreateView):
     pass
 
 
-class NewProductView(View):
+class NewProductView(LoginRequiredMixin, View):
 
     def get(self, request):
         products = Product.objects.all().order_by('add_date')[:6]
@@ -209,8 +243,23 @@ class ContactView(CreateView):
     pass
 
 
-class ShoppingCartView(CreateView):
-    pass
+class ShoppingCartView(View):
+
+    def get(self, request):
+        user = request.user
+        shopping_cart = ShoppingCart.objects.get(user=user)
+        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        return render(request, 'cart.html', {'products': orders_lines})
+
+
+
+
+
+
+
+
+
+
 
 
 

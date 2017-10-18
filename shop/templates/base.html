@@ -32,7 +32,7 @@
                     <li><a href="{% url 'contact_us' %}">Contact</a></li>
                     {% if request.user.is_authenticated and request.user.is_staff %}
                     <li><a href="{% url 'add_product' %}">Add Product</a></li>
-                    <li><a href="{% url 'change_product' %}">Change Product</a></li>
+                    <li><a href="">Change Product</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -43,7 +43,7 @@
                      <li><a href="{% url 'sign_up' %}" ><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
                     <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Log in</a></li>
                     {% endif %}
-                    <li><a href=""><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
+                    <li><a href="{% url 'shopping_cart' %}"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
                 </ul>
             </div>
         </div>

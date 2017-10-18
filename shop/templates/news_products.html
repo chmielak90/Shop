@@ -5,17 +5,17 @@
 <div class="container">
    {% for product in products %}
    {% if product.image %}
-    <div class='col-xs-3 col-sm-3 col-sm-offset-3' style=" display: inline; margin: 20px; margin-left: 55px; max-height: 220px; ">
+    <div class='col-xs-3 col-sm-3 col-sm-offset-3' style=" display: inline; margin: 20px; margin-left: 55px; height: 220px; ">
        <a href="{% url 'product_view' id=product.id %}">
          <h5><b>{{ product.product_name }}</b></h5>
-           <img src="{{ product.image.url }}" style="height: 180px; display: block; margin: auto" >
+           <img src="{{ product.image.url }}" style="max-height: 180px; display: block; margin: auto; max-width:260px;" >
            </a>
     </div>
     {% else %}
-    <div class='col-xs-3 col-sm-3 col-sm-offset-3' style=" display: inline-block; margin: 20px; margin-left: 55px ">
+    <div class='col-xs-3 col-sm-3 col-sm-offset-3' style=" display: inline; margin: 20px; margin-left: 55px; height: 220px;">
     <a href="{% url 'product_view' id=product.id %}">
     <h5><b>{{ product.product_name }}</b></h5>
-    <img src="{% static 'images/not_found.png' %}" style="height: 180px; display: block; margin: auto" >
+    <img src="{% static 'images/not_found.png' %}" style="max-height: 180px; display: block; margin: auto; max-width:260px;" >
         </a>
     </div>
     {% endif %}

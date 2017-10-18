@@ -1,0 +1,14 @@
+{% extends "shop_home.html" %}
+{% load widget_tweaks %}
+
+{% block content%}
+{% for product in products %}
+<div class="container">
+    <div class="show well">
+    <p><h4>{{ product.product_name }}</h4></p>
+    <div class="image_div"><img class="img-responsive image_categories" src={{ product.image.url }}></div>
+    </div>
+</div>
+
+{% endfor %}
+{% endblock %}

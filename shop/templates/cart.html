@@ -1,0 +1,18 @@
+{% extends "shop_home.html" %}
+{% load widget_tweaks %}
+
+{% block content%}
+
+<div class="container">
+   {% for product in products %}
+    <div class="show well">
+    <p style="display: inline-block"><h4>{{ product.product.product_name }}</h4></p>
+    <div class="image_div" style="display: inline-block"><img class="img-responsive image_categories" src={{ product.image.url }}></div>
+    <div class="quantity" style="display: inline-block">{{product.quantity}}</div>
+    <div class="quantity" style="display: inline-block">{{product.price_quantity}}</div>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

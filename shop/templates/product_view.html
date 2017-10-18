@@ -30,10 +30,20 @@
         <div class="inline_border"><button type="submit" class="btn btn-default btn-sm">
             <span class="glyphicon glyphicon-shopping-cart"></span> Add to cart
             </button></div>
+            {% if request.user.is_authenticated and request.user.is_staff %}
+            <div class="inline_border"><a href="{% url 'change_product' pk=product.id%}" class="btn btn-default btn-sm">
+            <span class="glyphicon glyphicon-edit"></span> Edit product
+            </a></div>
+            {% endif %}
             {% else %}
             <div class="inline_border"><button type="submit" class="btn btn-default btn-sm" disabled>
             <span class="glyphicon glyphicon-shopping-cart"></span> Add to cart
             </button></div>
+            {% if request.user.is_authenticated and request.user.is_staff %}
+            <div class="inline_border"><a href="{% url 'change_product' id=product.id%}" class="btn btn-default btn-sm">
+            <span class="glyphicon glyphicon-edit"></span> Edit product
+            </a></div>
+            {% endif %}
             {% endif %}
     </form>
 </div>
