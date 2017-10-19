@@ -5,11 +5,16 @@
 
 <div class="container">
    {% for product in products %}
-    <div class="show well">
-    <p style="display: inline-block"><h4>{{ product.product.product_name }}</h4></p>
-    <div class="image_div" style="display: inline-block"><img class="img-responsive image_categories" src={{ product.image.url }}></div>
-    <div class="quantity" style="display: inline-block">{{product.quantity}}</div>
-    <div class="quantity" style="display: inline-block">{{product.price_quantity}}</div>
+    <div class="show well rel_container">
+    <div class="image_div"><img class="img-responsive image_categories" src={{ product.product.image.url }}></div>
+    <div class="heading_div h_div"><h4>{{ product.product.product_name }}</h4></div>
+   <div class="trash">
+    <div class="quantity h_div">Quantity: {{product.quantity}}</div>
+    <div class="quantity_price h_div">{{product.price_quantity}} USD</div>
+        <div class="h_div trash_cart">
+        <a class="btn btn-default btn-sm" href="{% url 'remove_cart' id=product.id %}"><span class="glyphicon glyphicon-trash"></span></a>
+       </div>
+    </div>
     </div>
     {% endfor %}
 </div>

@@ -2,12 +2,14 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.core import serializers
+from django.core.mail import EmailMessage
 from django.http import Http404
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 
 
 from django.shortcuts import render, get_object_or_404
+from django.template.loader import get_template
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.views import View
@@ -15,7 +17,8 @@ from django.views.generic import CreateView
 from django.views.generic import UpdateView
 
 from .models import User, ProductCategory, Address, Product, ShoppingCart, OrderLine, ProductAvailability
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityForm, ProductAvailabilityForm
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityForm, ProductAvailabilityForm, \
+    ContactForm
 
 
 class ShopView(View):
@@ -152,7 +155,7 @@ class ChangePasswordView(LoginRequiredMixin, View):
 
 
 class AddProductView(LoginRequiredMixin, PermissionRequiredMixin, View):
-    permission_required = 'add_product'
+    permission_required = 'shop.add_product'
 
     def get(self, request):
         form = ProductAvailabilityForm
@@ -181,9 +184,40 @@ class ProductView(View):
         if form.is_valid():
             product = Product.objects.get(pk=id)
             shopping_cart = ShoppingCart.objects.get(user=request.user)
-            OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
-                                     price_quantity=form.cleaned_data['quantity']*product.price,
-                                     shopping_cart=shopping_cart)
+            orders_line = OrderLine.objects.filter(shopping_cart=shopping_cart)
+            print(orders_line)
+            n = 0
+            t_f = False
+            if orders_line:
+                print(t_f)
+                print(len(orders_line))
+                print(n)
+                while n < len(orders_line):
+                    print(t_f)
+                    print(orders_line[n].product)
+                    print(product)
+                    if orders_line[n].product == product:
+                        orders_line[n].quantity = orders_line[n].quantity + form.cleaned_data['quantity']
+                        orders_line[n].price_quantity = orders_line[n].price_quantity + product.price * form.cleaned_data['quantity']
+                        orders_line[n].save()
+                        t_f = True
+                        break
+                    else:
+                        t_f = False
+                        n += 1
+
+                if not t_f:
+                    OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
+                                             price_quantity=form.cleaned_data['quantity'] * product.price,
+                                             shopping_cart=shopping_cart)
+                else:
+                    url = reverse('shopping_cart')
+                    return HttpResponseRedirect(url)
+            else:
+                OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
+                                         price_quantity=form.cleaned_data['quantity'] * product.price,
+                                         shopping_cart=shopping_cart)
+
             url = reverse('shopping_cart')
             return HttpResponseRedirect(url)
         else:
@@ -191,7 +225,7 @@ class ProductView(View):
 
 
 class ChangeProductView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    permission_required = 'change_product'
+    permission_required = 'shop.change_product'
     form_class = ProductAvailabilityForm
     template_name = 'add_product.html'
 
@@ -239,17 +273,63 @@ class NewProductView(LoginRequiredMixin, View):
         return render(request, 'news_products.html', {'products': products})
 
 
-class ContactView(CreateView):
-    pass
+class ContactView(View):
+
+    def get(self, request):
+        form = ContactForm
+        return render(request, 'contact.html', {'form': form})
+
+    def post(self, request):
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact_name = form.cleaned_data['contact_name']
+            contact_email = form.cleaned_data['contact_email']
+            form_content = form.cleaned_data['content']
+
+            template = get_template('contact_template.txt')
+            ctx = {
+                'contact_name': contact_name,
+                'contact_email': contact_email,
+                'form_content': form_content,
+            }
+
+            content = template.render(ctx)
+
+            email = EmailMessage("New contact form submission",
+                                 content,
+                                 ".Buy" + " ",
+                                 ['dotBuy@gmail.com'],
+                                 headers={'Reply-To': contact_email}
+                                 )
+            email.send()
+            return HttpResponseRedirect('contact_us')
+
+        return render(request, 'contact.html', {'form': form})
 
 
 class ShoppingCartView(View):
 
     def get(self, request):
+        if not request.user.is_authenticated():
+            url = reverse('login')
+            return HttpResponseRedirect(url)
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
         return render(request, 'cart.html', {'products': orders_lines})
+
+
+class RemoveProductCart(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = 'shop.delete_orderline'
+
+    def get(self, request, id):
+        order_line = OrderLine.objects.get(pk=id)
+        if request.user == order_line.shopping_cart.user:
+            order_line.delete()
+            url = reverse('shopping_cart')
+            return HttpResponseRedirect(url)
+        else:
+            return Http404('Bad request')
 
 
 

@@ -127,3 +127,55 @@ a.grey_submenu:focus{
     margin-top: 5px;
     
 }
+
+.rel_container{
+    position: relative;
+}
+
+.h_div{
+    display: inline-block;
+    position: absolute;
+    margin-top: 2vh;
+    float: left;
+}
+.image_div{
+    display: inline-block;
+}
+
+
+.heading_div{
+    margin-left: 2vw;
+}
+
+.quantity{
+    margin-left: 40vw;
+}
+
+.quantity_price{
+    margin-left: 45vw;
+}
+
+.trash_cart{
+    margin-left: 51vw;
+    margin-top: 1.5vh;
+}
+.trash{
+    float: left;
+    margin-left: 5vw;
+}
+
+#map {
+        display: inline-block;
+        height: 500px;
+        width: 50%;
+        float:left;
+        clear: right;
+        position: relative;
+        overflow: hidden;
+       }
+
+#contact_form{
+    display: inline-block;
+    float: right;
+    margin-right: 50px;
+}

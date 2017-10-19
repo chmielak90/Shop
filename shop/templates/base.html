@@ -13,6 +13,11 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="{% static 'js/map.js' %}"></script>
+        <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCBTd06S4swPktnhpu8JHxlLKDhiGwPnQA&callback=initMap">
+    </script>
+
     </head>
     <nav class="navbar navbar-inverse">
         <div class="container-fluid">
@@ -32,7 +37,7 @@
                     <li><a href="{% url 'contact_us' %}">Contact</a></li>
                     {% if request.user.is_authenticated and request.user.is_staff %}
                     <li><a href="{% url 'add_product' %}">Add Product</a></li>
-                    <li><a href="">Change Product</a></li>
+<!--                    <li><a href="">Change Product</a></li>-->
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

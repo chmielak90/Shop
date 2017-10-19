@@ -66,7 +66,7 @@ class Product(models.Model):
 
 
 class OrderLine(models.Model):
-    product = models.OneToOneField(Product)
+    product = models.ForeignKey(Product)
     quantity = models.IntegerField(null=False)
     price_quantity = models.FloatField(null=False)
     order = models.ForeignKey(Order, null=True, blank=True)
