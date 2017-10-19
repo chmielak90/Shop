@@ -60,6 +60,8 @@ class Product(models.Model):
     category = models.ManyToManyField(ProductCategory)
     image = models.ImageField(max_length=64, blank=True, null=True)
     add_date = models.DateTimeField(auto_now_add=True)
+    promo = models.NullBooleanField(default=False)
+    promo_percent = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.product_name

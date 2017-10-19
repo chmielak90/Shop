@@ -179,3 +179,50 @@ a.grey_submenu:focus{
     float: right;
     margin-right: 50px;
 }
+
+
+.ads{
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.product_image{
+    max-height: 180px; 
+    display: block;
+    margin: auto;
+    max-width:260px;
+}
+
+.product_div{
+    display: inline;
+    margin: 20px; 
+    margin-left: 55px;
+    height: 220px;
+}
+
+.user_button{
+    border-radius: 4px;
+}
+
+.user_button{
+    margin-top: 10px;
+}
+
+.total_pay{
+    display: inline-block;
+    float: right;
+}
+
+#promo_price{
+    color: red;
+}
+
+.promo{
+    z-index: 3;
+    position: absolute
+}
+
+.image_promo{
+    z-index: 1;
+}
+

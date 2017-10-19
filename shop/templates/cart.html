@@ -9,15 +9,27 @@
     <div class="image_div"><img class="img-responsive image_categories" src={{ product.product.image.url }}></div>
     <div class="heading_div h_div"><h4>{{ product.product.product_name }}</h4></div>
    <div class="trash">
-    <div class="quantity h_div">Quantity: {{product.quantity}}</div>
-    <div class="quantity_price h_div">{{product.price_quantity}} USD</div>
+    <div class="quantity h_div">Quantity: {{ product.quantity }}</div>
+    <div class="quantity_price h_div">{{ product.price_quantity }} USD</div>
         <div class="h_div trash_cart">
         <a class="btn btn-default btn-sm" href="{% url 'remove_cart' id=product.id %}"><span class="glyphicon glyphicon-trash"></span></a>
        </div>
     </div>
     </div>
     {% endfor %}
+
+<div class="show well total_pay">
+<div id="sum"><b><h4>{{ sum }} USD</h4></b></div>
+<a href="{% url 'checkout' %}" type="button" class="btn btn-default" id="submit">Back to shopping</a>
+<a href="{% url 'checkout' %}" type="button" class="btn btn-success" id="submit">Proceed to checkout</a>
+</div>
 </div>
 
-
 {% endblock %}
+
+
+
+
+
+
+

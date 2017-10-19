@@ -4,7 +4,6 @@
 
 {% block content%}
 {% for product in products %}
-{% if product.promo %}
 <div class="container">
     <div class="show well">
     <p><h4>{{ product.product_name }}</h4></p>
@@ -14,13 +13,6 @@
     <img class="img-responsive image_categories image_promo" src={{ product.image.url }}></div>
     </div>
 </div>
-{% else %}
-<div class="container">
-    <div class="show well">
-    <p><h4>{{ product.product_name }}</h4></p>
-    <div class="image_div"><img class="img-responsive image_categories" src={{ product.image.url }}></div>
-    </div>
-</div>
-{% endif %}
+
 {% endfor %}
 {% endblock %}

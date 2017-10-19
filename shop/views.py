@@ -24,8 +24,9 @@ from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityF
 class ShopView(View):
 
     def get(self, request):
+        products = Product.objects.order_by('?')[:6]
 
-        return render(request, 'shop_home.html', )
+        return render(request, 'shop_home.html', {'products': products})
 
 
 class RegisterView(View):
@@ -198,7 +199,9 @@ class ProductView(View):
                     print(product)
                     if orders_line[n].product == product:
                         orders_line[n].quantity = orders_line[n].quantity + form.cleaned_data['quantity']
-                        orders_line[n].price_quantity = orders_line[n].price_quantity + product.price * form.cleaned_data['quantity']
+                        orders_line[n].price_quantity = \
+                            orders_line[n].price_quantity + ((product.price-((product.price*product.promo_percent)/100))
+                                                             * form.cleaned_data['quantity'])
                         orders_line[n].save()
                         t_f = True
                         break
@@ -207,15 +210,18 @@ class ProductView(View):
                         n += 1
 
                 if not t_f:
-                    OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
-                                             price_quantity=form.cleaned_data['quantity'] * product.price,
+                    if product.promo:
+                     OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
+                                             price_quantity=form.cleaned_data['quantity'] *
+                                                            (product.price - (product.price*product.promo_percent)/100),
                                              shopping_cart=shopping_cart)
                 else:
                     url = reverse('shopping_cart')
                     return HttpResponseRedirect(url)
             else:
                 OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
-                                         price_quantity=form.cleaned_data['quantity'] * product.price,
+                                         price_quantity=form.cleaned_data['quantity'] *
+                                                        (product.price - (product.price * product.promo_percent) / 100),
                                          shopping_cart=shopping_cart)
 
             url = reverse('shopping_cart')
@@ -239,6 +245,8 @@ class ChangeProductView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
             product.product_name = form.cleaned_data['product_name']
             product.description = form.cleaned_data['description']
             product.price = form.cleaned_data['price']
+            product.promo = form.cleaned_data['promo']
+            product.promo_percent = form.cleaned_data['promo_percent']
             if form.cleaned_data['image']:
                 product.image = None
                 product.save()
@@ -262,8 +270,11 @@ class ShowCategoryProductView(View):
         return render(request, 'category.html', {'products': products})
 
 
-class PromoView(CreateView):
-    pass
+class PromoView(View):
+
+    def get(self, request):
+        products = Product.objects.filter(promo=True)
+        return render(request, 'promo_products.html', {'products': products})
 
 
 class NewProductView(LoginRequiredMixin, View):
@@ -316,7 +327,10 @@ class ShoppingCartView(View):
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
-        return render(request, 'cart.html', {'products': orders_lines})
+        sum = 0
+        for p in orders_lines:
+            sum += p.price_quantity
+        return render(request, 'cart.html', {'products': orders_lines, 'sum': sum})
 
 
 class RemoveProductCart(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -331,6 +345,17 @@ class RemoveProductCart(LoginRequiredMixin, PermissionRequiredMixin, View):
         else:
             return Http404('Bad request')
 
+
+class CheckoutView(View):
+
+    def get(self, request):
+        user = request.user
+        shopping_cart = ShoppingCart.objects.get(user=user)
+        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        sum = 0
+        for p in orders_lines:
+            sum += p.price_quantity
+        return render(request, 'cart.html', {'products': orders_lines, 'sum': sum})
 
 
 

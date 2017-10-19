@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
-
+{% block category %}
+<div class="btn-group-vertical col-md-12 mh-100 user_button" ><a href="{% url 'show_address' %}" type="button" class="btn btn-default user_button">Address book</a></div><br>
+<div class="btn-group-vertical col-md-12 mh-100 user_button" ><a href="{% url 'show_address' %}" type="button" class="btn btn-default user_button">My orders</a></div><br>
+<div class="btn-group-vertical col-md-12 mh-100 user_button" ><a href="{% url 'show_address' %}" type="button" class="btn btn-default user_button">My invoice's</a></div><br>
+{% endblock %}
 {% block content%}
 <div class="container">
     <div class="show well">

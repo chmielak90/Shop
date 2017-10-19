@@ -21,7 +21,7 @@ from django.contrib import admin
 from shop.views import (ShopView, LogIn, LogOutView, RegisterView, EditUserSignView,
                         AddAddressView, EditAddressView, ShowAddressesView, UserInfoView, AddProductView,
                         ProductView, UserEditView, PromoView, NewProductView, ContactView, ChangePasswordView,
-                        ShoppingCartView, ChangeProductView, ShowCategoryProductView, RemoveProductCart)
+                        ShoppingCartView, ChangeProductView, ShowCategoryProductView, RemoveProductCart, CheckoutView)
 
 
 urlpatterns = [
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^contact_us$', ContactView.as_view(), name='contact_us'),
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
     url(r'^cart$', ShoppingCartView.as_view(), name='shopping_cart'),
-    url(r'remove_product/(?P<id>(\d)+)$', RemoveProductCart.as_view(), name='remove_cart')
+    url(r'remove_product/(?P<id>(\d)+)$', RemoveProductCart.as_view(), name='remove_cart'),
+    url(r'checkout', CheckoutView.as_view(), name='checkout')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

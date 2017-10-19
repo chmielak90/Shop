@@ -1,6 +1,6 @@
 {% extends "shop_home.html" %}
 {% load widget_tweaks %}
-
+{% load mathfilters %}
 
 {% block content%}
 <div class="container">
@@ -9,7 +9,11 @@
 <p>{{ product.description}}</p>
 <br>
 <br>
+{% if product.promo %}
+<p>Price: <s>{{product.price}} USD</s> <span id="promo_price"><b>{% widthratio product.price 1 product.promo_percent as multiply %}{% widthratio multiply 100 1 as value %}{{ product.price|sub:value }} USD</b></span>
+{% else %}
 <p>Price: <b>{{product.price}}</b> usd
+{% endif %}
 <div class="inline">
     <form action="" method="POST">
         {% csrf_token %}

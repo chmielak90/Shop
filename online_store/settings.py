@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'shop',
     'widget_tweaks',
+    'mathfilters',
 ]
 
 AUTH_USER_MODEL = 'shop.User'
