@@ -16,9 +16,10 @@ from django.views import View
 from django.views.generic import CreateView
 from django.views.generic import UpdateView
 
-from .models import User, ProductCategory, Address, Product, ShoppingCart, OrderLine, ProductAvailability
+from .models import User, ProductCategory, Address, Product, ShoppingCart, OrderLine, ProductAvailability, Order, \
+    Invoice
 from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityForm, ProductAvailabilityForm, \
-    ContactForm
+    ContactForm, OrderAddressForm, InvoiceAddressForm
 
 
 class ShopView(View):
@@ -190,18 +191,11 @@ class ProductView(View):
             n = 0
             t_f = False
             if orders_line:
-                print(t_f)
-                print(len(orders_line))
-                print(n)
                 while n < len(orders_line):
-                    print(t_f)
-                    print(orders_line[n].product)
-                    print(product)
                     if orders_line[n].product == product:
                         orders_line[n].quantity = orders_line[n].quantity + form.cleaned_data['quantity']
-                        orders_line[n].price_quantity = \
-                            orders_line[n].price_quantity + ((product.price-((product.price*product.promo_percent)/100))
-                                                             * form.cleaned_data['quantity'])
+                        orders_line[n].price_quantity = (product.price-((product.price*product.promo_percent)/100) *
+                                                         (orders_line[n].quantity + form.cleaned_data['quantity']))
                         orders_line[n].save()
                         t_f = True
                         break
@@ -213,15 +207,14 @@ class ProductView(View):
                     if product.promo:
                      OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
                                              price_quantity=form.cleaned_data['quantity'] *
-                                                            (product.price - (product.price*product.promo_percent)/100),
+                                                            (product.price - (product.price * product.promo_percent)/100),
                                              shopping_cart=shopping_cart)
                 else:
                     url = reverse('shopping_cart')
                     return HttpResponseRedirect(url)
             else:
                 OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
-                                         price_quantity=form.cleaned_data['quantity'] *
-                                                        (product.price - (product.price * product.promo_percent) / 100),
+                                         price_quantity=form.cleaned_data['quantity'] * product.price ,
                                          shopping_cart=shopping_cart)
 
             url = reverse('shopping_cart')
@@ -280,7 +273,7 @@ class PromoView(View):
 class NewProductView(LoginRequiredMixin, View):
 
     def get(self, request):
-        products = Product.objects.all().order_by('add_date')[:6]
+        products = Product.objects.all().order_by('-add_date')[:6]
         return render(request, 'news_products.html', {'products': products})
 
 
@@ -329,7 +322,8 @@ class ShoppingCartView(View):
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
         sum = 0
         for p in orders_lines:
-            sum += p.price_quantity
+            if not p.order:
+                sum += p.price_quantity
         return render(request, 'cart.html', {'products': orders_lines, 'sum': sum})
 
 
@@ -354,19 +348,64 @@ class CheckoutView(View):
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
         sum = 0
         for p in orders_lines:
-            sum += p.price_quantity
-        return render(request, 'cart.html', {'products': orders_lines, 'sum': sum})
+            if not p.order:
+                sum += p.price_quantity
+
+        form_order = OrderAddressForm
+        form_invoice = InvoiceAddressForm
+        ctx = {
+            'products': orders_lines,
+            'sum': sum,
+            'form_order': form_order,
+            'form_invoice': form_invoice,
+               }
+        return render(request, 'checkout.html', ctx)
+
+    def post(self, request):
+        form_order = OrderAddressForm(request.POST)
+        form_invoice = InvoiceAddressForm(request.POST)
+        user = request.user
+        shopping_cart = ShoppingCart.objects.get(user=user)
+        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        if form_invoice.is_valid() and form_order.is_valid():
+            sum = 0
+            for p in orders_lines:
+                if not p.order:
+                    sum += p.price_quantity
+
+            order = Order.objects.create(user=user, comments=form_order.cleaned_data['comments'], sum_product_cost=sum, send_address=form_order.cleaned_data['send_address'])
+            Invoice.objects.create(order=order, bill_address=form_invoice.cleaned_data['bill_address'])
+
+            for order_line in orders_lines:
+                order_line.order = order
+                order_line.save()
+                product = ProductAvailability.objects.get(product=order_line.product)
+                product.quantity = product.quantity - order_line.quantity
+                product.save()
+                Payment.objects.create(status=True, order=order)
+
+        url = reverse('pay')
+        return HttpResponseRedirect(url)
 
 
+class PayView(View):
 
+    def get(self, request):
+        user = request.user
+        shopping_cart = ShoppingCart.objects.get(user=user)
+        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        sum_to_pay = 0
+        for order_line in orders_lines:
+            product = order_line.product
+            buy_quantity = order_line.quantity
+            avability = ProductAvailability.objects.get(product=product)
+            avability.quantity = avability.quantity - buy_quantity
+            if product.promo:
+                sum_to_pay += (product.price-((product.price*product.promo_percent)/100)) * buy_quantity
+            else:
+                sum_to_pay += product.price * buy_quantity
 
-
-
-
-
-
-
-
+        return render(request, 'pay_succes.html', {'sum': sum_to_pay,})
 
 
 # def json_objects(request):

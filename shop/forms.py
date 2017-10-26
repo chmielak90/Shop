@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import EmailValidator
 
-from shop.models import Product, ProductAvailability
+from shop.models import Product, ProductAvailability, Address, Order, Invoice
 
 
 class LoginForm(forms.Form):
@@ -97,7 +97,7 @@ class ProductAvailabilityForm(forms.ModelForm):
         'class': "form-control col-sm-4",
     }
 
-    quantity = forms.IntegerField(label="Quantity avaliable", widget=forms.NumberInput(attrs=CNT_QUANTITY))
+    quantity = forms.IntegerField(label="Quantity available", widget=forms.NumberInput(attrs=CNT_QUANTITY))
 
     class Meta:
         model = Product
@@ -113,8 +113,21 @@ class ContactForm(forms.Form):
         'name': "email"
     }
 
-
-
     contact_name = forms.CharField(required=True, widget=forms.TextInput(attrs=CNT_NAME))
     contact_email = forms.EmailField(required=True, widget=forms.EmailInput(attrs=CNT_EMAIL))
     content = forms.CharField(required=True, widget=forms.Textarea)
+
+
+class OrderAddressForm(forms.ModelForm):
+
+    class Meta:
+        model = Order
+        fields = ('comments', 'send_address')
+
+
+class InvoiceAddressForm(forms.ModelForm):
+
+    class Meta:
+        model = Invoice
+        fields = ('bill_address',)
+
