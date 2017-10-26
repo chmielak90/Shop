@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block category %}
+<div class="btn-group-vertical col-md-12 mh-100 user_button" ><a href="{% url 'user_info' %}" type="button" class="btn btn-default user_button">User info</a></div><br>
+<div class="btn-group-vertical col-md-12 mh-100 user_button" ><a href="{% url 'show_address' %}" type="button" class="btn btn-default user_button">My orders</a></div><br>
+<div class="btn-group-vertical col-md-12 mh-100 user_button" ><a href="{% url 'show_address' %}" type="button" class="btn btn-default user_button">My invoice's</a></div><br>
+{% endblock %}
 
 {% block content%}
 <div class="container">
@@ -15,5 +20,8 @@
             
     </div>
     {% endfor %}
+    <div id="button_address">
+    <a type="button" href="{% url 'add_address' %}" class="btn btn-default" data-id="{{ address.pk }}">Add address</a>
+</div>
 </div>
 {% endblock %}

@@ -37,6 +37,7 @@
                     <li><a href="{% url 'contact_us' %}">Contact</a></li>
                     {% if request.user.is_authenticated and request.user.is_staff %}
                     <li><a href="{% url 'add_product' %}">Add Product</a></li>
+                    <li><a href="{% url 'add_product' %}">Add Category</a></li>
 <!--                    <li><a href="">Change Product</a></li>-->
                     {% endif %}
                 </ul>
@@ -78,7 +79,7 @@
                 </div>
                 <div class="well">
                     {% block ads_2 %}
-                    <img class="ads" src="{% static 'images/your_ads.png' %}">
+                    <img class="ads" src="{% static 'images/cube.jpeg' %}">
                     {% endblock %}
                 </div>
             </div>

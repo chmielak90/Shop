@@ -7,18 +7,28 @@
 {% if product.promo %}
 <div class="container">
     <div class="show well">
-    <p><h4>{{ product.product_name }}</h4></p>
-    
+    <a href="{% url 'product_view' id=product.id %}"><p><h4>{{ product.product_name }}</h4></p></a>
     <div class="image_div">
     <img class="image_categories promo" src="{% static 'images/promo-tag.png' %}">
-    <img class="img-responsive image_categories image_promo" src={{ product.image.url }}></div>
+    {% if product.image %}
+    <img class="img-responsive image_categories image_promo" src={{ product.image.url }}>
+    {% else %}
+    <img class="img-responsive img-thumbnail" src="{% static 'images/not_found.png' %}">
+    {% endif %}
+    </div>
     </div>
 </div>
 {% else %}
 <div class="container">
     <div class="show well">
-    <p><h4>{{ product.product_name }}</h4></p>
-    <div class="image_div"><img class="img-responsive image_categories" src={{ product.image.url }}></div>
+    <a href="{% url 'product_view' id=product.id %}"><p><h4>{{ product.product_name }}</h4></p></a>
+    <div class="image_div">
+    {% if product.image %}
+    <img class="img-responsive image_categories" src="{{ product.image.url }}">
+    {% else %}
+    <img class="img-responsive img-thumbnail" src="{% static 'images/not_found.png' %}">
+    {% endif %}
+    </div>
     </div>
 </div>
 {% endif %}
