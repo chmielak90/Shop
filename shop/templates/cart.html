@@ -1,12 +1,17 @@
 {% extends "shop_home.html" %}
 {% load widget_tweaks %}
+{% load staticfiles %}
 
 {% block content%}
 
 <div class="container">
    {% for product in products %}
     <div class="show well rel_container">
+    {% if product.product.image %}
     <div class="image_div"><img class="img-responsive image_categories" src={{ product.product.image.url }}></div>
+    {% else %}
+    <div class="image_div"><img class="img-responsive image_categories" src="{% static 'images/not_found.png' %}"></div>
+    {% endif %}
     <div class="heading_div h_div"><h4>{{ product.product.product_name }}</h4></div>
    <div class="trash">
     <div class="quantity h_div">Quantity: {{ product.quantity }}</div>

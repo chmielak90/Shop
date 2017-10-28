@@ -63,6 +63,16 @@ class Product(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
     promo = models.NullBooleanField(default=False)
     promo_percent = models.FloatField(null=True, blank=True)
+    promo_price = models.FloatField(null=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if self.promo:
+            discount = (self.price * self.promo_percent)/100
+            self.promo_price = self.price - discount
+            super(Product, self).save(*args, **kwargs)
+        else:
+            self.promo_price = None
+            super(Product, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.product_name

@@ -17,7 +17,7 @@ from django.views.generic import CreateView
 from django.views.generic import UpdateView
 
 from .models import User, ProductCategory, Address, Product, ShoppingCart, OrderLine, ProductAvailability, Order, \
-    Invoice
+    Invoice, Payment
 from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityForm, ProductAvailabilityForm, \
     ContactForm, OrderAddressForm, InvoiceAddressForm
 
@@ -194,8 +194,11 @@ class ProductView(View):
                 while n < len(orders_line):
                     if orders_line[n].product == product:
                         orders_line[n].quantity = orders_line[n].quantity + form.cleaned_data['quantity']
-                        orders_line[n].price_quantity = (product.price-((product.price*product.promo_percent)/100) *
-                                                         (orders_line[n].quantity + form.cleaned_data['quantity']))
+
+                        if orders_line[n].product.promo:
+                            orders_line[n].price_quantity = product.promo_price * orders_line[n].quantity
+                        else:
+                            orders_line[n].price_quantity = product.price * orders_line[n].quantity
                         orders_line[n].save()
                         t_f = True
                         break
@@ -203,19 +206,15 @@ class ProductView(View):
                         t_f = False
                         n += 1
 
-                if not t_f:
-                    if product.promo:
-                     OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
-                                             price_quantity=form.cleaned_data['quantity'] *
-                                                            (product.price - (product.price * product.promo_percent)/100),
+            if not t_f:
+                if product.promo:
+                    OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
+                                             price_quantity=form.cleaned_data['quantity'] * product.promo_price,
                                              shopping_cart=shopping_cart)
                 else:
-                    url = reverse('shopping_cart')
-                    return HttpResponseRedirect(url)
-            else:
-                OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
-                                         price_quantity=form.cleaned_data['quantity'] * product.price ,
-                                         shopping_cart=shopping_cart)
+                    OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
+                                             price_quantity=form.cleaned_data['quantity'] * product.price,
+                                             shopping_cart=shopping_cart)
 
             url = reverse('shopping_cart')
             return HttpResponseRedirect(url)

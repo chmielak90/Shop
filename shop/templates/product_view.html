@@ -1,6 +1,6 @@
 {% extends "shop_home.html" %}
 {% load widget_tweaks %}
-{% load mathfilters %}
+
 {% load staticfiles %}
 
 {% block content%}
@@ -15,9 +15,9 @@
 <br>
 <br>
 {% if product.promo %}
-<p>Price: <s>{{product.price}} USD</s> <span id="promo_price"><b>{% widthratio product.price 1 product.promo_percent as multiply %}{% widthratio multiply 100 1 as value %}{{ product.price|sub:value }} USD</b></span>
+<p>Price: <s>{{product.price}} USD</s> <span id="promo_price"><b>{{ product.promo_price }} USD</b></span>
 {% else %}
-<p>Price: <b>{{product.price}}</b> usd
+<p>Price: <b>{{product.price}}</b> USD
 {% endif %}
 <div class="inline">
     <form action="" method="POST">
