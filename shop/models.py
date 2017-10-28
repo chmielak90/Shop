@@ -96,6 +96,3 @@ class ProductAvailability(models.Model):
     quantity = models.IntegerField()
     product = models.OneToOneField(Product)
 
-
-# psycopg2
-# blank = true

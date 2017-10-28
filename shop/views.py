@@ -1,14 +1,12 @@
 from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
-from django.core import serializers
 from django.core.mail import EmailMessage
 from django.http import Http404
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.template.loader import get_template
 from django.urls import reverse
 from django.urls import reverse_lazy
@@ -372,7 +370,8 @@ class CheckoutView(View):
                 if not p.order:
                     sum += p.price_quantity
 
-            order = Order.objects.create(user=user, comments=form_order.cleaned_data['comments'], sum_product_cost=sum, send_address=form_order.cleaned_data['send_address'])
+            order = Order.objects.create(user=user, comments=form_order.cleaned_data['comments'],
+                                         sum_product_cost=sum, send_address=form_order.cleaned_data['send_address'])
             Invoice.objects.create(order=order, bill_address=form_invoice.cleaned_data['bill_address'])
 
             for order_line in orders_lines:
@@ -405,22 +404,3 @@ class PayView(View):
                 sum_to_pay += product.price * buy_quantity
 
         return render(request, 'pay_succes.html', {'sum': sum_to_pay,})
-
-
-# def json_objects(request):
-#     tasks = ProductCategory.objects.filter(parent_category__isnull=False)
-#     data = serializers.serialize("json", tasks)
-#     return HttpResponse(data, content_type='application/json')
-#
-#
-# def json_objects_search(request, id):
-#     tasks = ProductCategory.objects.filter(parent_category=id)
-#     data = serializers.serialize("json", tasks)
-#     return HttpResponse(data, content_type='application/json')
-
-
-
-
-
-
-

@@ -1,0 +1,41 @@
+{% extends "shop_home.html" %}
+{% load widget_tweaks %}
+
+{% block content%}
+
+<div class="container">
+   
+    <div class="show well rel_container">
+    {% for product in products %}
+    <div><h4>{{ product.product.product_name }}</h4></div>
+    <div style="display: inline-block; margin-left: 55vw" >Quantity: {{ product.quantity }}</div>
+    {% endfor %}
+</div>
+<div class="show well total_pay">
+<div id="sum"><b><h4>{{ sum }} USD</h4></b></div>
+
+</div>
+</div>
+<div class="container">
+    <div class='col-xs-12 col-sm-4 col-sm-offset-3'>
+        <form action="" method="POST" class="form-inline" id="loggin" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form_order %}
+            <div class="form-group">
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+            </div>
+            {% endfor %}
+            {% for field in form_invoice %}
+            <div class="form-group">
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+            </div>
+            {% endfor %}
+            <div class="pay">        
+                <button type="submit" class="btn btn-success" id="submit">PayPal</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
