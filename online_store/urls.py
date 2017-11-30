@@ -13,43 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf import settings
-from django.conf.urls import url
-from django.conf.urls.static import static
+from django.conf.urls import include, url
 from django.contrib import admin
-
-from shop.views import (ShopView, LogIn, LogOutView, RegisterView, EditUserSignView,
-                        AddAddressView, EditAddressView, ShowAddressesView, UserInfoView, AddProductView,
-                        ProductView, UserEditView, PromoView, NewProductView, ContactView, ChangePasswordView,
-                        ShoppingCartView, ChangeProductView, ShowCategoryProductView, RemoveProductCart, CheckoutView,
-                        PayView)
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', ShopView.as_view(), name='home_page'),
-    url(r'^login$', LogIn.as_view(), name='login'),
-    url(r'^logout$', LogOutView.as_view(), name='logout'),
-    url(r'^sign$', RegisterView.as_view(), name='sign_up'),
-    url(r'^continue_sign/$', EditUserSignView.as_view(), name='continue_sign'),
-    url(r'^add_address$', AddAddressView.as_view(), name='add_address'),
-    url(r'^addresses$', ShowAddressesView.as_view(), name='show_address'),
-    url(r'^edit_address/(?P<pk>(\d)+)$', EditAddressView.as_view(), name='edit_address'),
-    url(r'^user$', UserInfoView.as_view(), name='user_info'),
-    url(r'^add_product$', AddProductView.as_view(), name='add_product'),
-    url(r'^change_product/(?P<pk>(\d)+)$', ChangeProductView.as_view(), name='change_product'),
-    # url(r'^change_product$', ChangeProductView.as_view(), name='change_product'),
-    url(r'^product/(?P<id>(\d)+)$', ProductView.as_view(), name='product_view'),
-    url(r'^category/(?P<id>(\d)+)$', ShowCategoryProductView.as_view(), name='category_products'),
-    url(r'^edit_user$', UserEditView.as_view()),
-    url(r'^promo$', PromoView.as_view(), name='promo'),
-    url(r'^news$', NewProductView.as_view(), name='new_products'),
-    url(r'^contact_us$', ContactView.as_view(), name='contact_us'),
-    url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
-    url(r'^cart$', ShoppingCartView.as_view(), name='shopping_cart'),
-    url(r'remove_product/(?P<id>(\d)+)$', RemoveProductCart.as_view(), name='remove_cart'),
-    url(r'checkout$', CheckoutView.as_view(), name='checkout'),
-    url(r'pay$', PayView.as_view(), name="pay")
+    url(r'^shop/', include('shop.urls'))
 
-
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
