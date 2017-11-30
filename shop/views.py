@@ -2,22 +2,40 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.mail import EmailMessage
-from django.http import Http404
-from django.http import HttpResponseRedirect
-
-
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
-from django.urls import reverse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView
-from django.views.generic import UpdateView
+from django.views.generic import CreateView, UpdateView
 
-from .models import User, ProductCategory, Address, Product, ShoppingCart, OrderLine, ProductAvailability, Order, \
-    Invoice, Payment
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProductQuantityForm, ProductAvailabilityForm, \
-    ContactForm, OrderAddressForm, InvoiceAddressForm
+from .forms import (
+    ChangePasswordForm,
+    ContactForm,
+    InvoiceAddressForm,
+    LoginForm,
+    OrderAddressForm,
+    ProductAvailabilityForm,
+    ProductQuantityForm,
+    RegisterForm,
+    )
+from .models import (
+    Address,
+    Invoice,
+    Order,
+    OrderLine,
+    Payment,
+    Product,
+    ProductAvailability,
+    ProductCategory,
+    ShoppingCart,
+    User,
+    )
+
+
+def url_response_redirect(url_name):
+    url = reverse(f'{url_name}',)
+    return HttpResponseRedirect(url)
 
 
 class ShopView(View):
@@ -46,8 +64,7 @@ class RegisterView(View):
             g.user_set.add(new_user)
             user = authenticate(username=username, password=password)
             login(request, user)
-            url = reverse('continue_sign',)
-            return HttpResponseRedirect(url)
+            return url_response_redirect('continue_sign')
         else:
             return render(request, 'register.html', {'form': form})
 
@@ -74,8 +91,7 @@ class LogIn(View):
             user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
             if user is not None:
                 login(request, user)
-                url = reverse('home_page')
-                return HttpResponseRedirect(url)
+                return url_response_redirect('home_page')
             else:
                 return render(request, 'loggin.html', {'form': form, 'field.error': 'Invalid username or password'})
 
@@ -83,8 +99,7 @@ class LogIn(View):
 class LogOutView(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
-        url = reverse('home_page')
-        return HttpResponseRedirect(url)
+        return url_response_redirect('home_page')
 
 
 class AddAddressView(LoginRequiredMixin, CreateView):
@@ -146,10 +161,9 @@ class ChangePasswordView(LoginRequiredMixin, View):
                 password = form.cleaned_data['password']
                 user.set_password(password)
                 user.save()
-                url = reverse('user_info')
                 user = authenticate(username=user, password=password)
                 login(request, user)
-                return HttpResponseRedirect(url)
+                return url_response_redirect('user_info')
 
         return render(request, 'change_password.html', {'form': form})
 
@@ -185,9 +199,8 @@ class ProductView(View):
             product = Product.objects.get(pk=id)
             shopping_cart = ShoppingCart.objects.get(user=request.user)
             orders_line = OrderLine.objects.filter(shopping_cart=shopping_cart)
-            print(orders_line)
             n = 0
-            t_f = False
+            true_false = False
             if orders_line:
                 while n < len(orders_line):
                     if orders_line[n].product == product:
@@ -198,13 +211,13 @@ class ProductView(View):
                         else:
                             orders_line[n].price_quantity = product.price * orders_line[n].quantity
                         orders_line[n].save()
-                        t_f = True
+                        true_false = True
                         break
                     else:
-                        t_f = False
+                        true_false = False
                         n += 1
 
-            if not t_f:
+            if not true_false:
                 if product.promo:
                     OrderLine.objects.create(product=product, quantity=form.cleaned_data['quantity'],
                                              price_quantity=form.cleaned_data['quantity'] * product.promo_price,
@@ -214,8 +227,7 @@ class ProductView(View):
                                              price_quantity=form.cleaned_data['quantity'] * product.price,
                                              shopping_cart=shopping_cart)
 
-            url = reverse('shopping_cart')
-            return HttpResponseRedirect(url)
+            return url_response_redirect('shopping_cart')
         else:
             return Http404('Bad gateway')
 
@@ -254,9 +266,7 @@ class ShowCategoryProductView(View):
 
     def get(self, request, id):
         category = ProductCategory.objects.get(pk=id)
-        print(category)
         products = Product.objects.filter(category=category)
-        print(products)
         return render(request, 'category.html', {'products': products})
 
 
@@ -317,11 +327,11 @@ class ShoppingCartView(View):
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
-        sum = 0
+        product_sum = 0
         for p in orders_lines:
             if not p.order:
-                sum += p.price_quantity
-        return render(request, 'cart.html', {'products': orders_lines, 'sum': sum})
+                product_sum += p.price_quantity
+        return render(request, 'cart.html', {'products': orders_lines, 'sum': product_sum})
 
 
 class RemoveProductCart(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -331,8 +341,7 @@ class RemoveProductCart(LoginRequiredMixin, PermissionRequiredMixin, View):
         order_line = OrderLine.objects.get(pk=id)
         if request.user == order_line.shopping_cart.user:
             order_line.delete()
-            url = reverse('shopping_cart')
-            return HttpResponseRedirect(url)
+            return url_response_redirect('shopping_cart')
         else:
             return Http404('Bad request')
 
@@ -375,15 +384,15 @@ class CheckoutView(View):
             Invoice.objects.create(order=order, bill_address=form_invoice.cleaned_data['bill_address'])
 
             for order_line in orders_lines:
-                order_line.order = order
-                order_line.save()
-                product = ProductAvailability.objects.get(product=order_line.product)
-                product.quantity = product.quantity - order_line.quantity
-                product.save()
-                Payment.objects.create(status=True, order=order)
+                if not order_line.order:
+                    order_line.order = order
+                    order_line.save()
+                    product = ProductAvailability.objects.get(product=order_line.product)
+                    product.quantity = product.quantity - order_line.quantity
+                    product.save()
+                    Payment.objects.create(status=True, order=order)
 
-        url = reverse('pay')
-        return HttpResponseRedirect(url)
+        return url_response_redirect('pay')
 
 
 class PayView(View):
@@ -394,13 +403,25 @@ class PayView(View):
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
         sum_to_pay = 0
         for order_line in orders_lines:
-            product = order_line.product
-            buy_quantity = order_line.quantity
-            avability = ProductAvailability.objects.get(product=product)
-            avability.quantity = avability.quantity - buy_quantity
-            if product.promo:
-                sum_to_pay += (product.price-((product.price*product.promo_percent)/100)) * buy_quantity
-            else:
-                sum_to_pay += product.price * buy_quantity
+            if not order_line.order:
+                product = order_line.product
+                buy_quantity = order_line.quantity
+                availability = ProductAvailability.objects.get(product=product)
+                if availability.quantity < buy_quantity:
+                    if product.promo:
+                        sum_to_pay += product.promo_price * availability.quantity
+                    else:
+                        sum_to_pay += product.price * availability.quantity
 
+                    availability.quantity = 0
+
+                else:
+                    if product.promo:
+                        sum_to_pay += product.promo_price * buy_quantity
+                    else:
+                        sum_to_pay += product.price * buy_quantity
+
+                    availability.quantity = availability.quantity - buy_quantity
+
+                availability.save()
         return render(request, 'pay_succes.html', {'sum': sum_to_pay,})
