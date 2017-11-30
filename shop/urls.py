@@ -29,5 +29,4 @@ urlpatterns = [
     url(r'remove_product/(?P<id>(\d)+)$', views.RemoveProductCart.as_view(), name='remove_cart'),
     url(r'checkout$', views.CheckoutView.as_view(), name='checkout'),
     url(r'pay$', views.PayView.as_view(), name="pay")
-
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
