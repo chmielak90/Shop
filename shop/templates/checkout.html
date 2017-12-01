@@ -7,8 +7,10 @@
    
     <div class="show well rel_container">
     {% for product in products %}
+    {% if not product.order %}
     <div><h4>{{ product.product.product_name }}</h4></div>
     <div style="display: inline-block; margin-left: 55vw" >Quantity: {{ product.quantity }}</div>
+    {% endif %}
     {% endfor %}
 </div>
 <div class="show well total_pay">
@@ -18,7 +20,7 @@
 </div>
 <div class="container">
     <div class='col-xs-12 col-sm-4 col-sm-offset-3'>
-        <form action="" method="POST" class="form-inline" id="loggin" enctype="multipart/form-data">
+        <form action="" method="POST" class="form-inline">
             {% csrf_token %}
             {% for field in form_order %}
             <div class="form-group">
@@ -26,6 +28,7 @@
                 {{ field.label_tag }} {{ field }}
             </div>
             {% endfor %}
+            {% csrf_token %}
             {% for field in form_invoice %}
             <div class="form-group">
                 {{ field.errors }}
