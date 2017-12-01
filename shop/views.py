@@ -34,7 +34,7 @@ from .models import (
 
 
 def url_response_redirect(url_name):
-    url = reverse(f'{url_name}',)
+    url = reverse('{}'.format(url_name),)
     return HttpResponseRedirect(url)
 
 
@@ -374,13 +374,14 @@ class CheckoutView(View):
         shopping_cart = ShoppingCart.objects.get(user=user)
         orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
         if form_invoice.is_valid() and form_order.is_valid():
-            sum = 0
+            product_sum = 0
             for p in orders_lines:
                 if not p.order:
-                    sum += p.price_quantity
+                    product_sum += p.price_quantity
 
             order = Order.objects.create(user=user, comments=form_order.cleaned_data['comments'],
-                                         sum_product_cost=sum, send_address=form_order.cleaned_data['send_address'])
+                                         sum_product_cost=product_sum,
+                                         send_address=form_order.cleaned_data['send_address'])
             Invoice.objects.create(order=order, bill_address=form_invoice.cleaned_data['bill_address'])
 
             for order_line in orders_lines:
@@ -424,4 +425,4 @@ class PayView(View):
                     availability.quantity = availability.quantity - buy_quantity
 
                 availability.save()
-        return render(request, 'pay_succes.html', {'sum': sum_to_pay,})
+        return render(request, 'pay_succes.html', {'sum': sum_to_pay, })
