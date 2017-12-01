@@ -6,6 +6,7 @@
 
 <div class="container">
    {% for product in products %}
+   {% if not product.order %}
     <div class="show well rel_container">
     {% if product.product.image %}
     <div class="image_div"><img class="img-responsive image_categories" src={{ product.product.image.url }}></div>
@@ -21,11 +22,12 @@
        </div>
     </div>
     </div>
+    {% endif %}
     {% endfor %}
 
 <div class="show well total_pay">
 <div id="sum"><b><h4>{{ sum }} USD</h4></b></div>
-<a href="{% url 'checkout' %}" type="button" class="btn btn-default" id="submit">Back to shopping</a>
+<a href="{% url 'home_page' %}" type="button" class="btn btn-default" id="submit">Back to shopping</a>
 <a href="{% url 'checkout' %}" type="button" class="btn btn-success" id="submit">Proceed to checkout</a>
 </div>
 </div>
