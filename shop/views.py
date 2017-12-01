@@ -60,8 +60,8 @@ class RegisterView(View):
             password = form.cleaned_data['password']
             new_user = User.objects.create_user(username=username, email=email, password=password)
             ShoppingCart.objects.create(user=new_user)
-            g = Group.objects.get(name='Buyer')
-            g.user_set.add(new_user)
+            group = Group.objects.get(name='Buyer')
+            group.user_set.add(new_user)
             user = authenticate(username=username, password=password)
             login(request, user)
             return url_response_redirect('continue_sign')
