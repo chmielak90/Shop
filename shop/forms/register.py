@@ -21,10 +21,19 @@ class RegisterForm(forms.Form):
         'id': 'pass_check'
     }
 
-    username = forms.CharField(label="Username", widget=forms.TextInput(attrs=CNT_USERNAME))
-    email = forms.CharField(label="Email", widget=forms.EmailInput(attrs=CNT_EMAIL), validators=[EmailValidator()])
-    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs=CNT_PASSWORD_1))
-    password_checked = forms.CharField(label="Re-enter password", widget=forms.PasswordInput(attrs=CNT_PASSWORD_2))
+    username = forms.CharField(
+        label="Username",
+        widget=forms.TextInput(attrs=CNT_USERNAME))
+    email = forms.CharField(
+        label="Email",
+        widget=forms.EmailInput(attrs=CNT_EMAIL),
+        validators=[EmailValidator()])
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs=CNT_PASSWORD_1))
+    password_checked = forms.CharField(
+        label="Re-enter password",
+        widget=forms.PasswordInput(attrs=CNT_PASSWORD_2))
 
     def clean(self):
         cleaned_data = super(RegisterForm, self).clean()
