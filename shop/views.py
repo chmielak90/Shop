@@ -347,11 +347,11 @@ class ShoppingCartView(View):
             return HttpResponseRedirect(url)
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
-        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        orders_lines = (OrderLine.objects.
+                        filter(shopping_cart=shopping_cart).filter(order=None))
         product_sum = 0
-        for p in orders_lines:
-            if not p.order:
-                product_sum += p.price_quantity
+        for order_line in orders_lines:
+            product_sum += order_line.price_quantity
         return render(request,
                       'cart.html',
                       {'products': orders_lines, 'sum': product_sum})
@@ -375,7 +375,8 @@ class CheckoutView(View):
     def get(self, request):
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
-        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        orders_lines = (OrderLine.objects.
+                        filter(shopping_cart=shopping_cart).filter(order=None))
         product_sum = 0
         for p in orders_lines:
             if not p.order:
@@ -395,12 +396,12 @@ class CheckoutView(View):
         form_invoice = InvoiceAddressForm(request.POST)
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
-        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        orders_lines = (OrderLine.objects.
+                        filter(shopping_cart=shopping_cart).filter(order=None))
         if form_invoice.is_valid() and form_order.is_valid():
             product_sum = 0
             for p in orders_lines:
-                if not p.order:
-                    product_sum += p.price_quantity
+                product_sum += p.price_quantity
             order = Order.objects.create(
                 user=user, comments=form_order.cleaned_data['comments'],
                 sum_product_cost=product_sum,
@@ -409,14 +410,13 @@ class CheckoutView(View):
                 order=order,
                 bill_address=form_invoice.cleaned_data['bill_address'])
             for order_line in orders_lines:
-                if not order_line.order:
-                    order_line.order = order
-                    order_line.save()
-                    product = ProductAvailability.objects.get(
-                        product=order_line.product)
-                    product.quantity = product.quantity - order_line.quantity
-                    product.save()
-                    Payment.objects.create(status=True, order=order)
+                order_line.order = order
+                order_line.save()
+                product = ProductAvailability.objects.get(
+                    product=order_line.product)
+                product.quantity = product.quantity - order_line.quantity
+                product.save()
+                Payment.objects.create(status=True, order=order)
         return url_response_redirect('pay')
 
 
@@ -425,28 +425,27 @@ class PayView(View):
     def get(self, request):
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
-        orders_lines = OrderLine.objects.filter(shopping_cart=shopping_cart)
+        order = Order.objects.filter(user=user).latest('pk')
+        orders_lines = (OrderLine.objects
+                        .filter(shopping_cart=shopping_cart)
+                        .filter(order=order))
         sum_to_pay = 0
         for order_line in orders_lines:
-            if not order_line.order:
-                product = order_line.product
-                buy_quantity = order_line.quantity
-                availability = ProductAvailability.objects.get(product=product)
-                if availability.quantity < buy_quantity:
-                    if product.promo:
-                        sum_to_pay += (
-                            product.promo_price * availability.quantity)
-                    else:
-                        sum_to_pay += product.price * availability.quantity
-
-                    availability.quantity = 0
+            product = order_line.product
+            buy_quantity = order_line.quantity
+            availability = ProductAvailability.objects.get(product=product)
+            if availability.quantity < buy_quantity:
+                if product.promo:
+                    sum_to_pay += product.promo_price * availability.quantity
                 else:
-                    if product.promo:
-                        sum_to_pay += product.promo_price * buy_quantity
-                    else:
-                        sum_to_pay += product.price * buy_quantity
+                    sum_to_pay += product.price * availability.quantity
+                availability.quantity = 0
+            else:
+                if product.promo:
+                    sum_to_pay += product.promo_price * buy_quantity
+                else:
+                    sum_to_pay += product.price * buy_quantity
 
-                    availability.quantity = (
-                        availability.quantity - buy_quantity)
-                availability.save()
-        return render(request, 'pay_succes.html', {'sum': sum_to_pay, })
+                availability.quantity = availability.quantity - buy_quantity
+            availability.save()
+        return render(request, 'pay_success.html', {'sum': sum_to_pay, })
