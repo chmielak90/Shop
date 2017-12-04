@@ -11,4 +11,5 @@ class ProductQuantityForm(forms.Form):
         'class': "form-control input-sm col-sm-4 quantity_product",
     }
 
-    quantity = forms.IntegerField(label="", widget=forms.NumberInput(attrs=CNT_QUANTITY))
+    quantity = forms.IntegerField(label="",
+                                  widget=forms.NumberInput(attrs=CNT_QUANTITY))

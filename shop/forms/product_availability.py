@@ -12,7 +12,8 @@ class ProductAvailabilityForm(forms.ModelForm):
         'class': "form-control col-sm-4",
     }
 
-    quantity = forms.IntegerField(label="Quantity available", widget=forms.NumberInput(attrs=CNT_QUANTITY))
+    quantity = forms.IntegerField(label="Quantity available",
+                                  widget=forms.NumberInput(attrs=CNT_QUANTITY))
 
     class Meta:
         model = Product

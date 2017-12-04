@@ -7,9 +7,15 @@ class ChangePasswordForm(forms.Form):
 
     }
 
-    password_old = forms.CharField(label="Old password", widget=forms.PasswordInput(attrs=CNT_PASSWORD))
-    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs=CNT_PASSWORD))
-    password_checked = forms.CharField(label="Re-enter password", widget=forms.PasswordInput(attrs=CNT_PASSWORD))
+    password_old = forms.CharField(
+        label="Old password",
+        widget=forms.PasswordInput(attrs=CNT_PASSWORD))
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs=CNT_PASSWORD))
+    password_checked = forms.CharField(
+        label="Re-enter password",
+        widget=forms.PasswordInput(attrs=CNT_PASSWORD))
 
     def clean(self):
         cleaned_data = super(ChangePasswordForm, self).clean()

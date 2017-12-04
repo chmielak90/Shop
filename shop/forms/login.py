@@ -12,5 +12,7 @@ class LoginForm(forms.Form):
         'id': 'pass'
     }
 
-    username = forms.CharField(label="Username", widget=forms.TextInput(attrs=CNT_ID))
-    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs=CNT_PASSWORD))
+    username = forms.CharField(label="Username",
+                               widget=forms.TextInput(attrs=CNT_ID))
+    password = forms.CharField(label="Password",
+                               widget=forms.PasswordInput(attrs=CNT_PASSWORD))
