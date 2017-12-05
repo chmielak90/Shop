@@ -381,8 +381,8 @@ class CheckoutView(View):
         for p in orders_lines:
             if not p.order:
                 product_sum += p.price_quantity
-        form_order = OrderAddressForm
-        form_invoice = InvoiceAddressForm
+        form_order = OrderAddressForm(prefix="form_order")
+        form_invoice = InvoiceAddressForm(prefix="form_invoice")
         ctx = {
             'products': orders_lines,
             'sum': product_sum,
@@ -392,23 +392,25 @@ class CheckoutView(View):
         return render(request, 'checkout.html', ctx)
 
     def post(self, request):
-        form_order = OrderAddressForm(request.POST)
-        form_invoice = InvoiceAddressForm(request.POST)
+        form_order = OrderAddressForm(request.POST, prefix="form_order")
+        order_valid = form_order.is_valid()
+        form_invoice = InvoiceAddressForm(request.POST, prefix="form_invoice")
+        invoice_valid = form_invoice.is_valid()
         user = request.user
         shopping_cart = ShoppingCart.objects.get(user=user)
         orders_lines = (OrderLine.objects.
                         filter(shopping_cart=shopping_cart).filter(order=None))
-        if form_invoice.is_valid() and form_order.is_valid():
+        if order_valid and invoice_valid:
             product_sum = 0
             for p in orders_lines:
                 product_sum += p.price_quantity
             order = Order.objects.create(
                 user=user, comments=form_order.cleaned_data['comments'],
                 sum_product_cost=product_sum,
-                send_address=form_order.cleaned_data['send_address'])
+                send_address_id=form_order.cleaned_data['send_address'])
             Invoice.objects.create(
                 order=order,
-                bill_address=form_invoice.cleaned_data['bill_address'])
+                bill_address_id=form_invoice.cleaned_data['bill_address'])
             for order_line in orders_lines:
                 order_line.order = order
                 order_line.save()
