@@ -11,7 +11,7 @@ class Order(models.Model):
                                 verbose_name='Comment to order',
                                 blank=True)
     sum_product_cost = models.FloatField(null=False)
-    send_address = models.OneToOneField(Address)
+    send_address = models.ForeignKey(Address)
     order_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
