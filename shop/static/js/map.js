@@ -1,10 +1,10 @@
 function initMap() {
-        var uluru = {lat: 52.2308984, lng: 20.98838909999995};
+        var uluru = {lat: 52.230266, lng: 21.0026791};
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 14,
           center: uluru
         });
-        var contentString = '<strong>CodersLab</strong><br>warszawa, prosta 51<br>';
+        var contentString = '<strong>.Buy</strong><br>Warszawa, Złote Tarasy<br>';
 
         var infowindow = new google.maps.InfoWindow({
           content: contentString
