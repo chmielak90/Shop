@@ -207,43 +207,32 @@ class ProductView(View):
             product = Product.objects.get(pk=id)
             shopping_cart = ShoppingCart.objects.get(user=request.user)
             orders_line = OrderLine.objects.filter(shopping_cart=shopping_cart)
-            n = 0
-            true_false = False
-            if orders_line:
-                while n < len(orders_line):
-                    if orders_line[n].product == product:
-                        orders_line[n].quantity = (
-                            orders_line[n].quantity
-                            + form.cleaned_data['quantity'])
+            quantity = form.cleaned_data['quantity']
+            price = product.price
+            if product.promo:
+                price = product.promo_price
+            condition = False
+            order_line_id = None
+            for i in range(len(orders_line)):
+                if (product == orders_line[i].product
+                        and not orders_line[i].order):
+                    condition = True
+                    order_line_id = orders_line[i].id
+            if condition:
+                order_line = OrderLine.objects.get(id=order_line_id)
+                order_line.quantity = (
+                    order_line.quantity
+                    + form.cleaned_data['quantity'])
 
-                        if orders_line[n].product.promo:
-                            orders_line[n].price_quantity = (
-                                product.promo_price * orders_line[n].quantity)
-                        else:
-                            orders_line[n].price_quantity = (
-                                product.price * orders_line[n].quantity)
-                        orders_line[n].save()
-                        true_false = True
-                        break
-                    else:
-                        true_false = False
-                        n += 1
-
-            if not true_false:
-                if product.promo:
-                    OrderLine.objects.create(
-                        product=product,
-                        quantity=form.cleaned_data['quantity'],
-                        price_quantity=(form.cleaned_data['quantity']
-                                        * product.promo_price),
-                        shopping_cart=shopping_cart)
-                else:
-                    OrderLine.objects.create(
-                        product=product,
-                        quantity=form.cleaned_data['quantity'],
-                        price_quantity=(form.cleaned_data['quantity']
-                                        * product.price),
-                        shopping_cart=shopping_cart)
+                order_line.price_quantity = (
+                    price * (order_line.quantity
+                             + form.cleaned_data['quantity']))
+                order_line.save()
+            else:
+                OrderLine.objects.create(product=product,
+                                         quantity=quantity,
+                                         price_quantity=price * quantity,
+                                         shopping_cart=shopping_cart)
             return url_response_redirect('shopping_cart')
         else:
             return Http404('Bad gateway')
