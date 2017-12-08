@@ -15,7 +15,6 @@ from django.views.generic import CreateView, UpdateView
 from .forms import (
     ChangePasswordForm,
     ContactForm,
-    InvoiceAddressForm,
     LoginForm,
     OrderAddressForm,
     ProductAvailabilityForm,
@@ -381,26 +380,21 @@ class CheckoutView(View):
         for p in orders_lines:
             if not p.order:
                 product_sum += p.price_quantity
-        form_order = OrderAddressForm(prefix="form_order")
-        form_invoice = InvoiceAddressForm(prefix="form_invoice")
+        form_order = OrderAddressForm(user=user)
         ctx = {
             'products': orders_lines,
             'sum': product_sum,
             'form_order': form_order,
-            'form_invoice': form_invoice,
                }
         return render(request, 'checkout.html', ctx)
 
     def post(self, request):
-        form_order = OrderAddressForm(request.POST, prefix="form_order")
-        order_valid = form_order.is_valid()
-        form_invoice = InvoiceAddressForm(request.POST, prefix="form_invoice")
-        invoice_valid = form_invoice.is_valid()
         user = request.user
+        form_order = OrderAddressForm(user, request.POST)
         shopping_cart = ShoppingCart.objects.get(user=user)
         orders_lines = (OrderLine.objects.
                         filter(shopping_cart=shopping_cart).filter(order=None))
-        if order_valid and invoice_valid:
+        if form_order.is_valid():
             product_sum = 0
             for p in orders_lines:
                 product_sum += p.price_quantity
@@ -410,7 +404,7 @@ class CheckoutView(View):
                 send_address_id=form_order.cleaned_data['send_address'])
             Invoice.objects.create(
                 order=order,
-                bill_address_id=form_invoice.cleaned_data['bill_address'])
+                bill_address_id=form_order.cleaned_data['bill_address'])
             for order_line in orders_lines:
                 order_line.order = order
                 order_line.save()
