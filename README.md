@@ -50,4 +50,4 @@ Go to `127.0.0.1:8000/shop` and then Log in at admin account. To see any result 
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
